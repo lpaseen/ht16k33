@@ -1,2 +1,5 @@
 # ht16k33
-arduino library for ht16k33 led/keyboard driver chip
+This library is used to allow a arduino like platform talk to the htk1633 chip
+to do things like turn on LEDs or scan keys
+
+

@@ -1,9 +1,11 @@
 /*
- * ht16k33.h - used to talk to the htk1633 chip to do things like turn on LEDs or scan keys
- * Copyright:  Peter Sjoberg <peters-alib@techwiz.ca>
+ * ht16k33.cpp - used to talk to the htk1633 chip to do things like turn on LEDs or scan keys
+ * Copyright:  Peter Sjoberg <peters-alib AT techwiz.ca>
  * History:
- * 2015-10-04  Peter Sjoberg <peters-src@techwiz.ca>
+ * 2015-10-04  Peter Sjoberg <peters-alib AT techwiz.ca>
  *             Created using https://www.arduino.cc/en/Hacking/LibraryTutorial and ht16k33 datasheet
+ * 2015-11-25  Peter Sjoberg <peters-alib AT techwiz DOT ca>
+ *	       first check in to github
  *
  */
 
