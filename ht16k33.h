@@ -39,6 +39,7 @@ class HT16K33
   uint8_t setBlinkRate(uint8_t rate); // HT16K33_DSP_{NOBLINK,BLINK2HZ,BLINK1HZ,BLINK05HZ}
   void    displayOn();
   void    displayOff();
+
  private:
   void _updateKeyram();
   uint8_t _i2c_write(uint8_t val);
