@@ -52,8 +52,8 @@ void loop() {
   Serial.print(F(" Off - "));
   Serial.println(dir,DEC);
 
-  if (HT.keyReady() != 0) { // key is pressed
-    key=HT.readKey();
+  key=HT.readKey();
+  if (key != 0) { // key is pressed
     if (key != lastKey){
       dir=-dir;
       Serial.print(F("Key pressed: ")); 

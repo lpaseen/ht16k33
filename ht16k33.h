@@ -33,9 +33,9 @@ class HT16K33
   uint8_t setLedNow(uint8_t ledno); //Set a single led and send led in one function
   uint8_t clearLedNow(uint8_t ledno); //Clear a single led and send led in one function
   uint8_t setBrightness(uint8_t level); // level 0-16, 0 means display off
-  boolean keyReady(); // true if any key is pressed
-  int8_t  readKey();  // read what key was pressed
-  void    readKeyRaw(KEYDATA keydata); //read the raw key info, bitmapped info of all key(s) pressed
+  boolean keyPressed(); // true if any key is pressed
+  int8_t  readKey();  // read what key was pressed, Fresh=false to go from cache
+  void    readKeyRaw(KEYDATA keydata,boolean Fresh=true); //read the raw key info, bitmapped info of all key(s) pressed
   uint8_t setBlinkRate(uint8_t rate); // HT16K33_DSP_{NOBLINK,BLINK2HZ,BLINK1HZ,BLINK05HZ}
   void    displayOn();
   void    displayOff();

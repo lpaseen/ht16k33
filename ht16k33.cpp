@@ -237,17 +237,17 @@ uint8_t HT16K33::setBrightness(uint8_t level){ // level 0-16, 0 means display of
 /****************************************************************/
 //
 /****************
- * Check if a key is pressed or released
- * returned true if some statechange happened
+ * Check if a key is pressed
+ * returned true if one or more key(s) is pressed
  * 
  */
-boolean HT16K33::keyReady(){ 
+boolean HT16K33::keyPressed(){ 
   // PSDEBUG
   //  uint8_t v;
   //  v=_i2c_read(HT16K33_IFAP);
   //  Serial.println(v,HEX);
   return _i2c_read(HT16K33_IFAP) != 0;
-} // keyReady
+} // keyPressed
 
 
 /****************************************************************/
@@ -265,11 +265,11 @@ void HT16K33::_updateKeyram(){
 
 /****************************************************************/
 //
-void HT16K33::readKeyRaw(HT16K33::KEYDATA keydata){
+void HT16K33::readKeyRaw(HT16K33::KEYDATA keydata,boolean Fresh){
   int8_t i;
 
   // get the current state
-  _updateKeyram();
+  if (Fresh) {_updateKeyram();}
 
   for (i=0;i<3;i++){
     keydata[i]=_keyram[i];
@@ -286,16 +286,19 @@ void HT16K33::readKeyRaw(HT16K33::KEYDATA keydata){
  * 0 means no key pressed.
  * "1" means the key no 1 is pressed
  * "-1" means the key no 1 is released 
- * BUG:
- *  assumption to be verified!
- *   When a key is pressed the bit and flag is set
- *   once it's read the flag is cleared but the ram is un changed
- *   When released the flag is set and corresponding bit is cleared
  *
+ *Observations:
+ * As long as the key is pressed the bit and flag is set
+ *   so holding it down keeps the bit and flag set
+ * When released the key corresponding bit is cleared but the flag is NOT set
+ * This means that the only way a key release can be detected is
+ * by only polling readKey and ignoring flag
+ * (or of two keys are pressed and one is released)
+ * they 
  */
 
 int8_t HT16K33::readKey(){
-  HT16K33::KEYDATA oldKeyData;
+  static HT16K33::KEYDATA oldKeyData;
   uint16_t diff;
   uint8_t key;
   int8_t i,j;
@@ -304,13 +307,12 @@ int8_t HT16K33::readKey(){
   for (i=0;i<3;i++){
     oldKeyData[i]=_keyram[i];
   }
-
-  _updateKeyram(); // get current state
+  _updateKeyram();
 
   key=0; //the key that changed state
   for (i=0;i<3;i++){
     diff=_keyram[i] ^ oldKeyData[i]; //XOR old and new, any changed bit is set.
-    if ( diff !=0 ){
+    if ( diff !=0 ){ // something did change
       for (j=0;j<13;j++){
 	key++;
 	if (((diff >> j) & 1) == 1){
@@ -325,7 +327,7 @@ int8_t HT16K33::readKey(){
       key+=13;
     } // if diff
   } // for i
-  return 0; //apperently no key was pressed
+  return 0; //apperently no new key was pressed - old might still be held down
 } // readKey
 
 
