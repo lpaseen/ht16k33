@@ -254,14 +254,27 @@ uint8_t HT16K33::keyINTflag(){
 //
 /****************
  * Check if a key is pressed
- * returned true if one or more key(s) is pressed
+ * returns how many keys that are currently pressed
  * 
  */
-boolean HT16K33::keyPressed(){ 
-  // PSDEBUG
+
+//From http://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
+#ifdef __GNUC__
+  uint16_t _popcount(uint16_t x) {
+    return __builtin_popcount(x);
+  }
+#else
+  uint16_t _popcount(uint16_t i) {
+    i = i - ((i >> 1) & 0x55555555);
+    i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+    return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+  }
+#endif
+
+uint8_t HT16K33::keysPressed(){ 
   //  Serial.println(_keyram[0]|_keyram[1]|_keyram[2],HEX);
-  return (_keyram[0]|_keyram[1]|_keyram[2])!=0;
-} // keyPressed
+  return (_popcount(_keyram[0])+_popcount(_keyram[1])+_popcount(_keyram[2]));
+} // keysPressed
 
 
 /****************************************************************/
@@ -275,7 +288,6 @@ void HT16K33::_updateKeyram(){
   _keyram[2]=curkeyram[5]<<8 | curkeyram[4];
   return;
 } // _updateKeyram
-
 
 /****************************************************************/
 //
@@ -292,7 +304,6 @@ void HT16K33::readKeyRaw(HT16K33::KEYDATA keydata,boolean Fresh){
   return;
 } // readKeyRaw
 
-
 /****************************************************************
  * read the keys and return the key that changed state
  * if more than one is pressed (compared to last scan) 
@@ -300,27 +311,37 @@ void HT16K33::readKeyRaw(HT16K33::KEYDATA keydata,boolean Fresh){
  * 0 means no key pressed.
  * "1" means the key no 1 is pressed
  * "-1" means the key no 1 is released 
+ * "clear"=true means it will only look keys currently pressed down.
+ *     this is so you can detect what key is still pressed down after
+ *     several keys are pressed down and then all but one is released
+ *     (without keeping track of up/down separately)
  *
  *Observations:
- * As long as the key is pressed the bit and flag is set
- *   so holding it down keeps the bit and flag set
+ * As long as the key is pressed the keyram bit is set
+ * the flag is set when key is pressed down but then cleared at first
+ * read of key ram.
  * When released the key corresponding bit is cleared but the flag is NOT set
  * This means that the only way a key release can be detected is
  * by only polling readKey and ignoring flag
  * (or of two keys are pressed and one is released)
- * they 
+ * 
  */
 
-int8_t HT16K33::readKey(){
+int8_t HT16K33::readKey(boolean clear){
   static HT16K33::KEYDATA oldKeyData;
   uint16_t diff;
   uint8_t key;
   int8_t i,j;
 
-  // save the current state
+    // save the current state
   for (i=0;i<3;i++){
-    oldKeyData[i]=_keyram[i];
+    if (clear){
+      oldKeyData[i]=0;
+    } else {
+      oldKeyData[i]=_keyram[i];
+    }
   }
+    
   _updateKeyram();
 
   key=0; //the key that changed state
