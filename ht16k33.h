@@ -33,6 +33,7 @@ class HT16K33
   uint8_t setLedNow(uint8_t ledno); //Set a single led and send led in one function
   uint8_t clearLedNow(uint8_t ledno); //Clear a single led and send led in one function
   uint8_t setBrightness(uint8_t level); // level 0-16, 0 means display off
+  uint8_t keyINTflag(); // INTerrupt flag value
   boolean keyPressed(); // true if any key is pressed
   int8_t  readKey();  // read what key was pressed, Fresh=false to go from cache
   void    readKeyRaw(KEYDATA keydata,boolean Fresh=true); //read the raw key info, bitmapped info of all key(s) pressed

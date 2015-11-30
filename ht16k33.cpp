@@ -90,9 +90,9 @@ uint8_t HT16K33::_i2c_write(uint8_t val){
 
 /****************************************************************/
 // Write several bytes
-// "size" is amount of data to send including excluding the first command byte
+// "size" is amount of data to send excluding the first command byte
 // if LSB is true then swap high and low byte to send LSB MSB
-// Don't send odd amount of data if using LSB, then it will send one to much
+// NOTE: Don't send odd amount of data if using LSB, then it will send one to much
 //
 uint8_t HT16K33::_i2c_write(uint8_t cmd,uint8_t *data,uint8_t size,boolean LSB){
   uint8_t i;
@@ -197,7 +197,7 @@ boolean HT16K33::getLed(uint8_t ledno){ // check if a specific led is on(true) o
 /****************************************************************/
 //
 uint8_t HT16K33::sendLed(){
-  return _i2c_write(HT16K33_DDAP, _displayram,16,false);
+  return _i2c_write(HT16K33_DDAP, _displayram,16);
 } // sendLed
 
 /****************************************************************/
@@ -206,7 +206,7 @@ uint8_t HT16K33::setLedNow(uint8_t ledno){
   uint8_t rc;
   rc=setLed(ledno);
   if (rc==0){
-    return _i2c_write(HT16K33_DDAP, _displayram,16);
+    return sendLed();
   } else {
     return rc;
   }
@@ -241,12 +241,26 @@ uint8_t HT16K33::setBrightness(uint8_t level){ // level 0-16, 0 means display of
  * returned true if one or more key(s) is pressed
  * 
  */
-boolean HT16K33::keyPressed(){ 
+uint8_t HT16K33::keyINTflag(){ 
   // PSDEBUG
-  //  uint8_t v;
+  uint8_t v;
   //  v=_i2c_read(HT16K33_IFAP);
   //  Serial.println(v,HEX);
-  return _i2c_read(HT16K33_IFAP) != 0;
+  //  return _i2c_read(HT16K33_IFAP) != 0;
+  return (_keyram[0]+_keyram[1]+_keyram[2])!=0;
+} // keyINTflag
+
+/****************************************************************/
+//
+/****************
+ * Check if a key is pressed
+ * returned true if one or more key(s) is pressed
+ * 
+ */
+boolean HT16K33::keyPressed(){ 
+  // PSDEBUG
+  //  Serial.println(_keyram[0]|_keyram[1]|_keyram[2],HEX);
+  return (_keyram[0]|_keyram[1]|_keyram[2])!=0;
 } // keyPressed
 
 
