@@ -58,16 +58,11 @@ HT16K33::HT16K33(){
 
 /****************************************************************/
 // Setup the env
+//
 void HT16K33::begin(uint8_t address){
   uint8_t i;
-  //  Serial.begin(115200);
-  //  Serial.println("HTlib 0.1");
-  //  delay(2000);
   _address=address | BASEHTADDR;
   Wire.begin();
-  //  Wire.beginTransmission(_address);
-  //  Wire.write(HT16K33_SS|HT16K33_SS_NORMAL);
-  //  Wire.endTransmission();
   _i2c_write(HT16K33_SS|HT16K33_SS_NORMAL); // Wakeup
   _i2c_write(HT16K33_DSP | HT16K33_DSP_ON | HT16K33_DSP_NOBLINK); // Display on and no blinking
   _i2c_write(HT16K33_RIS | HT16K33_RIS_OUT); // INT pin works as row output 
@@ -77,19 +72,19 @@ void HT16K33::begin(uint8_t address){
     _displayram[i]=0;
   }
   _i2c_write(HT16K33_DDAP, _displayram,sizeof(_displayram),true);
-}
-
+} // begin
 
 /****************************************************************/
-// Write a single byte
+// internal function - Write a single byte
+//
 uint8_t HT16K33::_i2c_write(uint8_t val){
   Wire.beginTransmission(_address);
   Wire.write(val);
   return Wire.endTransmission();
-}
+} // _i2c_write
 
 /****************************************************************/
-// Write several bytes
+// internal function - Write several bytes
 // "size" is amount of data to send excluding the first command byte
 // if LSB is true then swap high and low byte to send LSB MSB
 // NOTE: Don't send odd amount of data if using LSB, then it will send one to much
@@ -109,22 +104,24 @@ uint8_t HT16K33::_i2c_write(uint8_t cmd,uint8_t *data,uint8_t size,boolean LSB){
     }
   }
   return Wire.endTransmission(); // Send off the data
-}
+} // _i2c_write
 
 /****************************************************************/
-// read a byte from specific address (send one byte(address to read) and read a byte)
+// internal function - read a byte from specific address (send one byte(address to read) and read a byte)
+//
 uint8_t HT16K33::_i2c_read(uint8_t addr){
   _i2c_write(addr);
   Wire.requestFrom(_address,(uint8_t) 1);
   return Wire.read();    // read one byte
-}
+} // _i2c_read
 
 /****************************************************************/
 // read an array from specific address (send a byte and read several bytes back)
 // return value is how many bytes that where really read
+//
 uint8_t HT16K33::_i2c_read(uint8_t addr,uint8_t *data,uint8_t size){
   uint8_t i,retcnt,val;
-
+  
   _i2c_write(addr);
   retcnt=Wire.requestFrom(_address, size);
   i=0;
@@ -134,32 +131,28 @@ uint8_t HT16K33::_i2c_read(uint8_t addr,uint8_t *data,uint8_t size){
   }
 
   return retcnt;
-}
+} // _i2c_read
 
 /****************************************************************/
+// Put the chip to sleep
 //
 uint8_t HT16K33::sleep(){
   return _i2c_write(HT16K33_SS|HT16K33_SS_STANDBY); // Stop oscillator
 } // sleep
 
 /****************************************************************/
+// Wake up the chip (after it been a sleep )
 //
 uint8_t HT16K33::normal(){
   return _i2c_write(HT16K33_SS|HT16K33_SS_NORMAL); // Start oscillator
 } // normal
 
 /****************************************************************/
+// Turn on one led but only in memory
+// To do it on chip a call to "sendLed" is needed
 //
 uint8_t HT16K33::clearLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
   if (ledno>=0 && ledno<128){
-#ifdef DEBUG
-    Serial.print(F("Clear led no "));
-    Serial.print(ledno,DEC);
-    Serial.print(F(" -> "));
-    Serial.print(int(ledno/8),HEX);
-    Serial.print(F(" "));
-    Serial.println((ledno % 8),HEX);
-#endif
     bitClear(_displayram[int(ledno/8)],(ledno % 8));
     return 0;
   } else {
@@ -168,17 +161,11 @@ uint8_t HT16K33::clearLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
 } // clearLed
 
 /****************************************************************/
+// Turn on one led but only in memory
+// To do it on chip a call to "sendLed" is needed
 //
 uint8_t HT16K33::setLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
   if (ledno>=0 && ledno<128){
-#ifdef DEBUG
-    Serial.print(F("Set led no "));
-    Serial.print(ledno,DEC);
-    Serial.print(F(" -> "));
-    Serial.print(int(ledno/8),HEX);
-    Serial.print(F(" "));
-    Serial.println((ledno % 8),HEX);
-#endif
     bitSet(_displayram[int(ledno/8)],(ledno % 8));
     return 0;
   } else {
@@ -187,14 +174,16 @@ uint8_t HT16K33::setLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
 } // setLed
 
 /****************************************************************/
+// check if a specific led is on(true) or off(false)
 //
-boolean HT16K33::getLed(uint8_t ledno){ // check if a specific led is on(true) or off(false)
+boolean HT16K33::getLed(uint8_t ledno){ 
   if (ledno>=0 && ledno<128){
     return bitRead(_displayram[int(ledno/8)],8-(ledno % 8)) == 0;
   }
 } // getLed
 
 /****************************************************************/
+// Send the display ram info to chip - kind of commit all changes to the outside world
 //
 uint8_t HT16K33::sendLed(){
   return _i2c_write(HT16K33_DDAP, _displayram,16);
@@ -202,6 +191,7 @@ uint8_t HT16K33::sendLed(){
 
 /****************************************************************/
 // set a single LED and update NOW
+//
 uint8_t HT16K33::setLedNow(uint8_t ledno){
   uint8_t rc;
   rc=setLed(ledno);
@@ -214,6 +204,7 @@ uint8_t HT16K33::setLedNow(uint8_t ledno){
 
 /****************************************************************/
 // clear a single LED and update NOW
+//
 uint8_t HT16K33::clearLedNow(uint8_t ledno){
   uint8_t rc;
   rc=clearLed(ledno);
@@ -225,8 +216,10 @@ uint8_t HT16K33::clearLedNow(uint8_t ledno){
 } // clearLedNow
 
 /****************************************************************/
+// Change brightness of the whole display
+// level 0-15, 0 means display off
 //
-uint8_t HT16K33::setBrightness(uint8_t level){ // level 0-16, 0 means display off
+uint8_t HT16K33::setBrightness(uint8_t level){
   if (HT16K33_DIM_1>=0 && level <HT16K33_DIM_16){
     return _i2c_write(HT16K33_DIM|level);
   } else {
@@ -235,28 +228,18 @@ uint8_t HT16K33::setBrightness(uint8_t level){ // level 0-16, 0 means display of
 } // setBrightness
 
 /****************************************************************/
+// Check the chips interrupt flag
+// 0 if no new key is pressed
+// !0 if some key is pressed and not yet read
 //
-/****************
- * Check if a key is pressed
- * returned true if one or more key(s) is pressed
- * 
- */
 uint8_t HT16K33::keyINTflag(){ 
-  // PSDEBUG
-  uint8_t v;
-  //  v=_i2c_read(HT16K33_IFAP);
-  //  Serial.println(v,HEX);
-  //  return _i2c_read(HT16K33_IFAP) != 0;
-  return (_keyram[0]+_keyram[1]+_keyram[2])!=0;
+  return _i2c_read(HT16K33_IFAP);
 } // keyINTflag
 
 /****************************************************************/
-//
-/****************
- * Check if a key is pressed
- * returns how many keys that are currently pressed
- * 
- */
+// Check if any key is pressed
+// returns how many keys that are currently pressed
+// 
 
 //From http://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
 #ifdef __GNUC__
@@ -276,8 +259,8 @@ uint8_t HT16K33::keysPressed(){
   return (_popcount(_keyram[0])+_popcount(_keyram[1])+_popcount(_keyram[2]));
 } // keysPressed
 
-
 /****************************************************************/
+// Internal function - update cached key array
 //
 void HT16K33::_updateKeyram(){
   uint8_t curkeyram[6];
@@ -290,6 +273,7 @@ void HT16K33::_updateKeyram(){
 } // _updateKeyram
 
 /****************************************************************/
+// return the key status
 //
 void HT16K33::readKeyRaw(HT16K33::KEYDATA keydata,boolean Fresh){
   int8_t i;
@@ -323,7 +307,6 @@ void HT16K33::readKeyRaw(HT16K33::KEYDATA keydata,boolean Fresh){
  * When released the key corresponding bit is cleared but the flag is NOT set
  * This means that the only way a key release can be detected is
  * by only polling readKey and ignoring flag
- * (or of two keys are pressed and one is released)
  * 
  */
 
@@ -362,13 +345,12 @@ int8_t HT16K33::readKey(boolean clear){
       key+=13;
     } // if diff
   } // for i
-  return 0; //apperently no new key was pressed - old might still be held down
+  return 0; //apperently no new key was pressed - old might still be held down, pass clear=true to see it
 } // readKey
 
-
 /****************************************************************/
+// Make the display blink
 //
-//  _i2c_write(HT16K33_DSP | HT16K33_DSP_ON | HT16K33_DSP_NOBLINK)); // Display on and no blinking
 uint8_t HT16K33::setBlinkRate(uint8_t rate){
   switch (rate) {
     case HT16K33_DSP_NOBLINK:
@@ -385,12 +367,14 @@ uint8_t HT16K33::setBlinkRate(uint8_t rate){
 
 /****************************************************************/
 // turn on the display
+//
 void HT16K33::displayOn(){
   _i2c_write(HT16K33_DSP |HT16K33_DSP_ON);
 } // displayOn
 
 /****************************************************************/
 // turn off the display
+//
 void HT16K33::displayOff(){
   _i2c_write(HT16K33_DSP |HT16K33_DSP_OFF);
 } // displayOff
