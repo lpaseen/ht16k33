@@ -293,8 +293,8 @@ void HT16K33::readKeyRaw(HT16K33::KEYDATA keydata,boolean Fresh){
  * if more than one is pressed (compared to last scan) 
  * only one is returned, the first one found
  * 0 means no key pressed.
- * "1" means the key no 1 is pressed
- * "-1" means the key no 1 is released 
+ * "1" means the key #1 is pressed
+ * "-1" means the key #1 is released 
  * "clear"=true means it will only look keys currently pressed down.
  *     this is so you can detect what key is still pressed down after
  *     several keys are pressed down and then all but one is released
