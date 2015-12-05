@@ -6,7 +6,9 @@
  *             Created using https://www.arduino.cc/en/Hacking/LibraryTutorial and ht16k33 datasheet
  * 2015-11-25  Peter Sjoberg <peters-alib AT techwiz DOT ca>
  *	       first check in to github
-*/
+ * 2015-12-05  Peter Sjoberg <peters-alib AT techwiz.ca>
+ *	       moved displayram to public section
+ */
 
 
 
@@ -19,6 +21,9 @@ class HT16K33
 {
  public:
   typedef uint16_t KEYDATA[3];
+  typedef uint8_t  DisplayRam_t[16];
+
+  DisplayRam_t displayRam;
   
   HT16K33(); // the class itself
 
@@ -49,7 +54,7 @@ class HT16K33
   uint8_t _i2c_read(uint8_t addr,uint8_t *data,uint8_t size);
 
   KEYDATA _keyram;
-  uint8_t _displayram[16];
+  //  uint8_t _displayram[16];
   uint8_t _address;
 };
 

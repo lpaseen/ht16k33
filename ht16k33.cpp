@@ -68,10 +68,10 @@ void HT16K33::begin(uint8_t address){
   _i2c_write(HT16K33_RIS | HT16K33_RIS_OUT); // INT pin works as row output 
   _i2c_write(HT16K33_DIM | HT16K33_DIM_16);  // Brightness set to max
   //Clear all lights
-  for (i=0;i<sizeof(_displayram);i++){
-    _displayram[i]=0;
+  for (i=0;i<sizeof(displayRam);i++){
+    displayRam[i]=0;
   }
-  _i2c_write(HT16K33_DDAP, _displayram,sizeof(_displayram),true);
+  _i2c_write(HT16K33_DDAP, displayRam,sizeof(displayRam),true);
 } // begin
 
 /****************************************************************/
@@ -153,7 +153,7 @@ uint8_t HT16K33::normal(){
 //
 uint8_t HT16K33::clearLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
   if (ledno>=0 && ledno<128){
-    bitClear(_displayram[int(ledno/8)],(ledno % 8));
+    bitClear(displayRam[int(ledno/8)],(ledno % 8));
     return 0;
   } else {
     return 1;
@@ -166,7 +166,7 @@ uint8_t HT16K33::clearLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
 //
 uint8_t HT16K33::setLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
   if (ledno>=0 && ledno<128){
-    bitSet(_displayram[int(ledno/8)],(ledno % 8));
+    bitSet(displayRam[int(ledno/8)],(ledno % 8));
     return 0;
   } else {
     return 1;
@@ -178,7 +178,7 @@ uint8_t HT16K33::setLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
 //
 boolean HT16K33::getLed(uint8_t ledno){ 
   if (ledno>=0 && ledno<128){
-    return bitRead(_displayram[int(ledno/8)],8-(ledno % 8)) == 0;
+    return bitRead(displayRam[int(ledno/8)],8-(ledno % 8)) == 0;
   }
 } // getLed
 
@@ -186,7 +186,7 @@ boolean HT16K33::getLed(uint8_t ledno){
 // Send the display ram info to chip - kind of commit all changes to the outside world
 //
 uint8_t HT16K33::sendLed(){
-  return _i2c_write(HT16K33_DDAP, _displayram,16);
+  return _i2c_write(HT16K33_DDAP, displayRam,16);
 } // sendLed
 
 /****************************************************************/
