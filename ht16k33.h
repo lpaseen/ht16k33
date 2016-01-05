@@ -39,7 +39,7 @@ class HT16K33
   typedef uint8_t  DisplayRam_t[16];
 
   DisplayRam_t displayRam;
-  
+
   HT16K33(); // the class itself
 
   void    begin(uint8_t address);
@@ -49,6 +49,7 @@ class HT16K33
   uint8_t clearLed(uint8_t ledno); // 16x8 = 128 LEDs to turn on, 0-127
   uint8_t setLed(uint8_t ledno); // 16x8 = 128 LEDs to turn on, 0-127
   boolean getLed(uint8_t ledno); // check if a specific led is on(true) or off(false)
+  uint8_t setDisplayRaw(uint8_t pos, uint8_t val); // load byte "pos" with value "val"
   uint8_t sendLed(); // send whatever led patter you set
   uint8_t setLedNow(uint8_t ledno); //Set a single led and send led in one function
   uint8_t clearLedNow(uint8_t ledno); //Clear a single led and send led in one function
@@ -69,7 +70,6 @@ class HT16K33
   uint8_t _i2c_read(uint8_t addr,uint8_t *data,uint8_t size);
 
   KEYDATA _keyram;
-  //  uint8_t _displayram[16];
   uint8_t _address;
 };
 

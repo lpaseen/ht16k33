@@ -119,7 +119,7 @@ uint8_t HT16K33::_i2c_write(uint8_t cmd,uint8_t *data,uint8_t size,boolean LSB){
       Wire.write(data[i++]);
     }
   }
-  return Wire.endTransmission(); // Send off the data
+  return Wire.endTransmission(); // Send out the data
 } // _i2c_write
 
 /****************************************************************/
@@ -164,7 +164,7 @@ uint8_t HT16K33::normal(){
 } // normal
 
 /****************************************************************/
-// Turn on one led but only in memory
+// Turn off one led but only in memory
 // To do it on chip a call to "sendLed" is needed
 //
 uint8_t HT16K33::clearLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
@@ -199,10 +199,20 @@ boolean HT16K33::getLed(uint8_t ledno){
 } // getLed
 
 /****************************************************************/
+uint8_t HT16K33::setDisplayRaw(uint8_t pos, uint8_t val) {
+  if (pos < sizeof(displayRam)) {
+    displayRam[pos] = val;
+    return 0;
+  } else {
+    return 1;
+  }
+} // setDisplayRaw
+
+/****************************************************************/
 // Send the display ram info to chip - kind of commit all changes to the outside world
 //
 uint8_t HT16K33::sendLed(){
-  return _i2c_write(HT16K33_DDAP, displayRam,16);
+  return _i2c_write(HT16K33_DDAP, displayRam,sizeof(displayRam));
 } // sendLed
 
 /****************************************************************/
