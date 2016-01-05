@@ -6,6 +6,9 @@
 # Datatypes (KEYWORD1)
 #######################################
 HT16K33	KEYWORD1
+KEYDATA	KEYWORD1
+DisplayRam_t	KEYWORD1
+displayRam	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -15,19 +18,23 @@ begin	KEYWORD2
 end	KEYWORD2
 sleep	KEYWORD2
 normal	KEYWORD2
-clearled	KEYWORD2
-setled	KEYWORD2
-getled	KEYWORD2
-sendled	KEYWORD2
-sendlednow	KEYWORD2
-clearlednow	KEYWORD2
+clearLed	KEYWORD2
+setLed	KEYWORD2
+getLed	KEYWORD2
+setDisplayRaw	KEYWORD2
+sendLed	KEYWORD2
+setLedNow	KEYWORD2
+clearLedNow	KEYWORD2
 setBrightness	KEYWORD2
-keyreadyRaw	KEYWORD2
-keyready	KEYWORD2
-readkey	KEYWORD2
-setblinkrate	KEYWORD2
-displayon	KEYWORD2
-displayoff	KEYWORD2
+keyINTflag	KEYWORD2
+keysPressed	KEYWORD2
+readKey	KEYWORD2
+readKeyRaw	KEYWORD2
+setBlinkRate	KEYWORD2
+displayOn	KEYWORD2
+displayOff	KEYWORD2
+
+
 
 #######################################
 # Instances (KEYWORD2)
