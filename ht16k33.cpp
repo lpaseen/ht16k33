@@ -81,7 +81,7 @@ void HT16K33::begin(uint8_t address){
   uint8_t i;
   _address=address | BASEHTADDR;
   Wire.begin();
-  _i2c_write(HT16K33_SS|HT16K33_SS_NORMAL); // Wakeup
+  _i2c_write(HT16K33_SS  | HT16K33_SS_NORMAL); // Wakeup
   _i2c_write(HT16K33_DSP | HT16K33_DSP_ON | HT16K33_DSP_NOBLINK); // Display on and no blinking
   _i2c_write(HT16K33_RIS | HT16K33_RIS_OUT); // INT pin works as row output 
   _i2c_write(HT16K33_DIM | HT16K33_DIM_16);  // Brightness set to max
@@ -194,7 +194,7 @@ uint8_t HT16K33::setLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
 //
 boolean HT16K33::getLed(uint8_t ledno){ 
   if (ledno>=0 && ledno<128){
-    return bitRead(displayRam[int(ledno/8)],8-(ledno % 8)) == 0;
+    return bitRead(displayRam[int(ledno/8)],ledno % 8) != 0;
   }
 } // getLed
 
