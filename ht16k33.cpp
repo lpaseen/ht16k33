@@ -192,7 +192,13 @@ uint8_t HT16K33::setLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
 /****************************************************************/
 // check if a specific led is on(true) or off(false)
 //
-boolean HT16K33::getLed(uint8_t ledno){ 
+boolean HT16K33::getLed(uint8_t ledno,boolean Fresh){ 
+
+  // get the current state from chip
+  if (Fresh) {
+    _i2c_read(HT16K33_DDAP, displayRam,sizeof(displayRam));
+  }
+
   if (ledno>=0 && ledno<128){
     return bitRead(displayRam[int(ledno/8)],ledno % 8) != 0;
   }

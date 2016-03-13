@@ -48,7 +48,7 @@ class HT16K33
   uint8_t normal(); // wake up chip and start ocillator
   uint8_t clearLed(uint8_t ledno); // 16x8 = 128 LEDs to turn on, 0-127
   uint8_t setLed(uint8_t ledno); // 16x8 = 128 LEDs to turn on, 0-127
-  boolean getLed(uint8_t ledno); // check if a specific led is on(true) or off(false)
+  boolean getLed(uint8_t ledno,boolean Fresh=false); // check if a specific led is on(true) or off(false)
   uint8_t setDisplayRaw(uint8_t pos, uint8_t val); // load byte "pos" with value "val"
   uint8_t sendLed(); // send whatever led patter you set
   uint8_t setLedNow(uint8_t ledno); //Set a single led and send led in one function
