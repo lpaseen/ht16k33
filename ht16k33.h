@@ -23,6 +23,9 @@
  *	       first check in to github
  * 2015-12-05  Peter Sjoberg <peters-alib AT techwiz.ca>
  *	       moved displayram to public section
+ * 2016-08-09  René Wennekes <rene.wennekes AT gmail.com>
+ *             Contribution of 7-segment & 16-segment display support
+ *             Added clearAll() function
  */
 
 
@@ -44,13 +47,21 @@ class HT16K33
 
   void    begin(uint8_t address);
   void    end();
+  void    clearAll(); // clear all LEDs
   uint8_t sleep();  // stop oscillator to put the chip to sleep
   uint8_t normal(); // wake up chip and start ocillator
   uint8_t clearLed(uint8_t ledno); // 16x8 = 128 LEDs to turn on, 0-127
   uint8_t setLed(uint8_t ledno); // 16x8 = 128 LEDs to turn on, 0-127
+  void    define7segFont(uint8_t *ptr); // Pass a pointer to a font table for 7seg
+  void    define16segFont(uint16_t *ptr); // Pass a pointer to a font table for 16seg
+  uint8_t set7Seg(uint8_t dig, uint8_t cha, boolean dp); // position 0-15, 0-15 (0-F Hexadecimal), decimal point
+  uint8_t set16Seg(uint8_t dig, uint8_t cha); // position 0-7, see asciifont.h
   boolean getLed(uint8_t ledno,boolean Fresh=false); // check if a specific led is on(true) or off(false)
   uint8_t setDisplayRaw(uint8_t pos, uint8_t val); // load byte "pos" with value "val"
   uint8_t sendLed(); // send whatever led patter you set
+  uint8_t set7SegNow(uint8_t dig, uint8_t cha, boolean dp); // position 0-15, 0-15 (0-F Hexadecimal), decimal point and send led in one function
+  uint8_t set7SegRaw(uint8_t dig, uint8_t val); // load byte "pos" with value "val"
+  uint8_t set16SegNow(uint8_t dig, uint8_t cha); // position 0-17, see asciifont.h and send led in one function
   uint8_t setLedNow(uint8_t ledno); //Set a single led and send led in one function
   uint8_t clearLedNow(uint8_t ledno); //Clear a single led and send led in one function
   uint8_t setBrightness(uint8_t level); // level 0-16, 0 means display off
@@ -61,16 +72,19 @@ class HT16K33
   uint8_t setBlinkRate(uint8_t rate); // HT16K33_DSP_{NOBLINK,BLINK2HZ,BLINK1HZ,BLINK05HZ}
   void    displayOn();
   void    displayOff();
+  // Some helper functions that can be useful in other parts of the code that use this library
+  uint8_t i2c_write(uint8_t val);
+  uint8_t i2c_write(uint8_t cmd,uint8_t *data,uint8_t size,boolean LSB=false);
+  uint8_t i2c_read(uint8_t addr);
+  uint8_t i2c_read(uint8_t addr,uint8_t *data,uint8_t size);
 
  private:
   void _updateKeyram();
-  uint8_t _i2c_write(uint8_t val);
-  uint8_t _i2c_write(uint8_t cmd,uint8_t *data,uint8_t size,boolean LSB=false);
-  uint8_t _i2c_read(uint8_t addr);
-  uint8_t _i2c_read(uint8_t addr,uint8_t *data,uint8_t size);
 
   KEYDATA _keyram;
   uint8_t _address;
+  uint8_t *_seg7Font;
+  uint16_t *_seg16Font;
 };
 
 

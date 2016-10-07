@@ -20,6 +20,9 @@
  *             Created using https://www.arduino.cc/en/Hacking/LibraryTutorial and ht16k33 datasheet
  * 2015-11-25  Peter Sjoberg <peters-alib AT techwiz DOT ca>
  *	       first check in to github
+ * 2016-08-09  René Wennekes <rene.wennekes AT gmail.com>
+ *             Contribution of 7-segment & 16-segment display support
+ *             Added clearAll() function
  *
  *
  *
@@ -81,23 +84,24 @@ void HT16K33::begin(uint8_t address){
   uint8_t i;
   _address=address | BASEHTADDR;
   Wire.begin();
-  _i2c_write(HT16K33_SS  | HT16K33_SS_NORMAL); // Wakeup
-  _i2c_write(HT16K33_DSP | HT16K33_DSP_ON | HT16K33_DSP_NOBLINK); // Display on and no blinking
-  _i2c_write(HT16K33_RIS | HT16K33_RIS_OUT); // INT pin works as row output 
-  _i2c_write(HT16K33_DIM | HT16K33_DIM_16);  // Brightness set to max
+  i2c_write(HT16K33_SS  | HT16K33_SS_NORMAL); // Wakeup
+  i2c_write(HT16K33_DSP | HT16K33_DSP_ON | HT16K33_DSP_NOBLINK); // Display on and no blinking
+  i2c_write(HT16K33_RIS | HT16K33_RIS_OUT); // INT pin works as row output 
+  i2c_write(HT16K33_DIM | HT16K33_DIM_16);  // Brightness set to max
   //Clear all lights
-  memcpy(displayRam,0,sizeof(displayRam));
-  _i2c_write(HT16K33_DDAP, displayRam,sizeof(displayRam),true);
+  //  memset(displayRam,0,sizeof(displayRam));
+  //  i2c_write(HT16K33_DDAP, displayRam,sizeof(displayRam),true);
+  clearAll();
 } // begin
 
 /****************************************************************/
 // internal function - Write a single byte
 //
-uint8_t HT16K33::_i2c_write(uint8_t val){
+uint8_t HT16K33::i2c_write(uint8_t val){
   Wire.beginTransmission(_address);
   Wire.write(val);
   return Wire.endTransmission();
-} // _i2c_write
+} // i2c_write
 
 /****************************************************************/
 // internal function - Write several bytes
@@ -105,7 +109,7 @@ uint8_t HT16K33::_i2c_write(uint8_t val){
 // if LSB is true then swap high and low byte to send LSB MSB
 // NOTE: Don't send odd amount of data if using LSB, then it will send one to much
 //
-uint8_t HT16K33::_i2c_write(uint8_t cmd,uint8_t *data,uint8_t size,boolean LSB){
+uint8_t HT16K33::i2c_write(uint8_t cmd,uint8_t *data,uint8_t size,boolean LSB){
   uint8_t i;
   Wire.beginTransmission(_address);
   Wire.write(cmd);
@@ -120,25 +124,25 @@ uint8_t HT16K33::_i2c_write(uint8_t cmd,uint8_t *data,uint8_t size,boolean LSB){
     }
   }
   return Wire.endTransmission(); // Send out the data
-} // _i2c_write
+} // i2c_write
 
 /****************************************************************/
 // internal function - read a byte from specific address (send one byte(address to read) and read a byte)
 //
-uint8_t HT16K33::_i2c_read(uint8_t addr){
-  _i2c_write(addr);
+uint8_t HT16K33::i2c_read(uint8_t addr){
+  i2c_write(addr);
   Wire.requestFrom(_address,(uint8_t) 1);
   return Wire.read();    // read one byte
-} // _i2c_read
+} // i2c_read
 
 /****************************************************************/
 // read an array from specific address (send a byte and read several bytes back)
 // return value is how many bytes that where really read
 //
-uint8_t HT16K33::_i2c_read(uint8_t addr,uint8_t *data,uint8_t size){
+uint8_t HT16K33::i2c_read(uint8_t addr,uint8_t *data,uint8_t size){
   uint8_t i,retcnt,val;
   
-  _i2c_write(addr);
+  i2c_write(addr);
   retcnt=Wire.requestFrom(_address, size);
   i=0;
   while(Wire.available() && i<size)    // slave may send less than requested
@@ -147,20 +151,55 @@ uint8_t HT16K33::_i2c_read(uint8_t addr,uint8_t *data,uint8_t size){
   }
 
   return retcnt;
-} // _i2c_read
+} // i2c_read
+
+/****************************************************************/
+// Clear all leds and displays
+//
+void HT16K33::clearAll(){
+  memset(displayRam,0,sizeof(displayRam));
+  i2c_write(HT16K33_DDAP, displayRam,sizeof(displayRam));
+} // clearAll
+
+/****************************************************************/
+// define seg7Font table
+//
+void HT16K33::define7segFont(uint8_t *ptr){
+  _seg7Font=ptr;
+} // define7segFont
+
+/****************************************************************/
+// define seg16Font table
+//
+void HT16K33::define16segFont(uint16_t *ptr){
+  _seg16Font=ptr;
+#ifdef PSDEBUG
+  Serial.print("DEBUG1: ");Serial.println((uint16_t)ptr,HEX);
+  Serial.println();
+  Serial.print("DEBUG2: ");Serial.println((uint16_t)_seg16Font,HEX);
+  Serial.println();
+  Serial.print("DEBUG3: ");Serial.println(ptr[0],HEX);
+  Serial.println(ptr[1],HEX);
+  Serial.println(ptr[2],HEX);
+  Serial.println();
+  Serial.print("DEBUG4: ");Serial.println(_seg16Font[0],HEX);
+  Serial.println(_seg16Font[1],HEX);
+  Serial.println(_seg16Font[2],HEX);
+#endif
+} // define16segFont
 
 /****************************************************************/
 // Put the chip to sleep
 //
 uint8_t HT16K33::sleep(){
-  return _i2c_write(HT16K33_SS|HT16K33_SS_STANDBY); // Stop oscillator
+  return i2c_write(HT16K33_SS|HT16K33_SS_STANDBY); // Stop oscillator
 } // sleep
 
 /****************************************************************/
 // Wake up the chip (after it been a sleep )
 //
 uint8_t HT16K33::normal(){
-  return _i2c_write(HT16K33_SS|HT16K33_SS_NORMAL); // Start oscillator
+  return i2c_write(HT16K33_SS|HT16K33_SS_NORMAL); // Start oscillator
 } // normal
 
 /****************************************************************/
@@ -196,7 +235,7 @@ boolean HT16K33::getLed(uint8_t ledno,boolean Fresh){
 
   // get the current state from chip
   if (Fresh) {
-    _i2c_read(HT16K33_DDAP, displayRam,sizeof(displayRam));
+    i2c_read(HT16K33_DDAP, displayRam,sizeof(displayRam));
   }
 
   if (ledno>=0 && ledno<128){
@@ -218,7 +257,7 @@ uint8_t HT16K33::setDisplayRaw(uint8_t pos, uint8_t val) {
 // Send the display ram info to chip - kind of commit all changes to the outside world
 //
 uint8_t HT16K33::sendLed(){
-  return _i2c_write(HT16K33_DDAP, displayRam,sizeof(displayRam));
+  return i2c_write(HT16K33_DDAP, displayRam,sizeof(displayRam));
 } // sendLed
 
 /****************************************************************/
@@ -248,12 +287,63 @@ uint8_t HT16K33::clearLedNow(uint8_t ledno){
 } // clearLedNow
 
 /****************************************************************/
+// Turn on one 7-segment but only in memory
+// To do it on chip a call to "sendLed" is needed
+//
+uint8_t HT16K33::set7Seg(uint8_t dig, uint8_t cha, boolean dp){ // position 0-15, 0-15 (0-F Hexadecimal), decimal point on|off
+  if (cha>=0 && cha<16 && dig>=0 && dig<16){
+    if (dig>=0 && dig<=7) {dig = dig*2;} else {dig = ((dig-8)*2)+1;} //re-arrange digit positions
+    uint8_t num = _seg7Font[cha];
+    if (dp) {bitSet(num,(7));} else {bitClear(num,(7));} //Set decimal point on 7th bit
+    displayRam[dig] = num;
+    return 0;
+  } else {
+    return 1;
+  }
+} // set7Seg
+
+/****************************************************************/
+uint8_t HT16K33::set7SegRaw(uint8_t dig, uint8_t val) {
+  if (dig>=0 && dig<16) {
+    if (dig>=0 && dig<=7) {dig = dig*2;} else {dig = ((dig-8)*2)+1;} //re-arrange digit positions
+    displayRam[dig] = val;
+    return 0;
+  } else {
+    return 1;
+  }
+} // set7SegRaw
+
+/****************************************************************/
+// Turn on one 16-segment but only in memory
+// To do it on chip a call to "sendLed" is needed
+//
+uint8_t HT16K33::set16Seg(uint8_t dig, uint8_t cha){ // position 0-15, 0-15 (0-F Hexadecimal)
+  if (cha>=0 && cha<128 && dig>=0 && dig<8){
+    dig = dig*2;
+    // reverse the bits using a lookup table
+    //    displayRam[dig+1] = BitReverseTable256[lowByte(seg16Chartable[cha])];
+    //    displayRam[dig] = BitReverseTable256[highByte(seg16Chartable[cha])];
+    //    displayRam[dig] = lowByte(seg16Chartable[cha]);
+    //    displayRam[dig+1] = highByte(seg16Chartable[cha]);
+    displayRam[dig] = lowByte(_seg16Font[cha]);
+    displayRam[dig+1] = highByte(_seg16Font[cha]);
+    //    Serial.print(lowByte(_seg16Font[cha]),HEX);Serial.print(F(" "));Serial.println(highByte(&_seg16Font[cha]),HEX);
+#ifdef PSDEBUG
+    Serial.print((uint16_t)_seg16Font,HEX);Serial.print(F(":"));Serial.print(_seg16Font[cha] & 0xff,HEX);Serial.print(F(" "));Serial.println(_seg16Font[cha] >> 8,HEX);
+#endif
+    return 0;
+  } else {
+    return 1;
+  }
+} // set16Seg
+
+/****************************************************************/
 // Change brightness of the whole display
 // level 0-15, 0 means display off
 //
 uint8_t HT16K33::setBrightness(uint8_t level){
   if (HT16K33_DIM_1>=0 && level <HT16K33_DIM_16){
-    return _i2c_write(HT16K33_DIM|level);
+    return i2c_write(HT16K33_DIM|level);
   } else {
     return 1;
   }
@@ -265,7 +355,7 @@ uint8_t HT16K33::setBrightness(uint8_t level){
 // !0 if some key is pressed and not yet read
 //
 uint8_t HT16K33::keyINTflag(){ 
-  return _i2c_read(HT16K33_IFAP);
+  return i2c_read(HT16K33_IFAP);
 } // keyINTflag
 
 /****************************************************************/
@@ -297,7 +387,7 @@ uint8_t HT16K33::keysPressed(){
 void HT16K33::_updateKeyram(){
   uint8_t curkeyram[6];
 
-  _i2c_read(HT16K33_KDAP, curkeyram, 6);
+  i2c_read(HT16K33_KDAP, curkeyram, 6);
   _keyram[0]=curkeyram[1]<<8 | curkeyram[0]; // datasheet page 21, 41H is high 40H is low
   _keyram[1]=curkeyram[3]<<8 | curkeyram[2]; // or LSB MSB
   _keyram[2]=curkeyram[5]<<8 | curkeyram[4];
@@ -389,7 +479,7 @@ uint8_t HT16K33::setBlinkRate(uint8_t rate){
     case HT16K33_DSP_BLINK2HZ:
     case HT16K33_DSP_BLINK1HZ:
     case HT16K33_DSP_BLINK05HZ:
-      _i2c_write(HT16K33_DSP |rate);
+      i2c_write(HT16K33_DSP |rate);
       return 0;
       ;;
   default:
@@ -401,14 +491,14 @@ uint8_t HT16K33::setBlinkRate(uint8_t rate){
 // turn on the display
 //
 void HT16K33::displayOn(){
-  _i2c_write(HT16K33_DSP |HT16K33_DSP_ON);
+  i2c_write(HT16K33_DSP |HT16K33_DSP_ON);
 } // displayOn
 
 /****************************************************************/
 // turn off the display
 //
 void HT16K33::displayOff(){
-  _i2c_write(HT16K33_DSP |HT16K33_DSP_OFF);
+  i2c_write(HT16K33_DSP |HT16K33_DSP_OFF);
 } // displayOff
 
 
