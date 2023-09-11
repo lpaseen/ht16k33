@@ -81,7 +81,6 @@ HT16K33::HT16K33(){
 // Setup the env
 //
 void HT16K33::begin(uint8_t address){
-  uint8_t i;
   _address=address | BASEHTADDR;
   Wire.begin();
   i2c_write(HT16K33_SS  | HT16K33_SS_NORMAL); // Wakeup
@@ -140,7 +139,7 @@ uint8_t HT16K33::i2c_read(uint8_t addr){
 // return value is how many bytes that where really read
 //
 uint8_t HT16K33::i2c_read(uint8_t addr,uint8_t *data,uint8_t size){
-  uint8_t i,retcnt,val;
+  uint8_t i,retcnt;
   
   i2c_write(addr);
   retcnt=Wire.requestFrom(_address, size);
@@ -158,7 +157,7 @@ uint8_t HT16K33::i2c_read(uint8_t addr,uint8_t *data,uint8_t size){
 //
 void HT16K33::clearAll(){
   memset(displayRam,0,sizeof(displayRam));
-  i2c_write(HT16K33_DDAP, displayRam,sizeof(displayRam));
+  i2c_write(HT16K33_DDAP,displayRam,sizeof(displayRam));
 } // clearAll
 
 /****************************************************************/
@@ -207,7 +206,7 @@ uint8_t HT16K33::normal(){
 // To do it on chip a call to "sendLed" is needed
 //
 uint8_t HT16K33::clearLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
-  if (ledno>=0 && ledno<128){
+  if (ledno<128){
     bitClear(displayRam[int(ledno/8)],(ledno % 8));
     return 0;
   } else {
@@ -220,7 +219,7 @@ uint8_t HT16K33::clearLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
 // To do it on chip a call to "sendLed" is needed
 //
 uint8_t HT16K33::setLed(uint8_t ledno){ // 16x8 = 128 LEDs to turn on, 0-127
-  if (ledno>=0 && ledno<128){
+  if (ledno<128){
     bitSet(displayRam[int(ledno/8)],(ledno % 8));
     return 0;
   } else {
@@ -235,12 +234,13 @@ boolean HT16K33::getLed(uint8_t ledno,boolean Fresh){
 
   // get the current state from chip
   if (Fresh) {
-    i2c_read(HT16K33_DDAP, displayRam,sizeof(displayRam));
+    i2c_read(HT16K33_DDAP,displayRam,sizeof(displayRam));
   }
 
-  if (ledno>=0 && ledno<128){
+  if (ledno<128){
     return bitRead(displayRam[int(ledno/8)],ledno % 8) != 0;
   }
+  return false;
 } // getLed
 
 /****************************************************************/
@@ -291,8 +291,8 @@ uint8_t HT16K33::clearLedNow(uint8_t ledno){
 // To do it on chip a call to "sendLed" is needed
 //
 uint8_t HT16K33::set7Seg(uint8_t dig, uint8_t cha, boolean dp){ // position 0-15, 0-15 (0-F Hexadecimal), decimal point on|off
-  if (cha>=0 && cha<16 && dig>=0 && dig<16){
-    if (dig>=0 && dig<=7) {dig = dig*2;} else {dig = ((dig-8)*2)+1;} //re-arrange digit positions
+  if (cha<16 && dig<16){
+    if (dig<=7) {dig = dig*2;} else {dig = ((dig-8)*2)+1;} //re-arrange digit positions
     uint8_t num = _seg7Font[cha];
     if (dp) {bitSet(num,(7));} else {bitClear(num,(7));} //Set decimal point on 7th bit
     displayRam[dig] = num;
@@ -304,8 +304,8 @@ uint8_t HT16K33::set7Seg(uint8_t dig, uint8_t cha, boolean dp){ // position 0-15
 
 /****************************************************************/
 uint8_t HT16K33::set7SegRaw(uint8_t dig, uint8_t val) {
-  if (dig>=0 && dig<16) {
-    if (dig>=0 && dig<=7) {dig = dig*2;} else {dig = ((dig-8)*2)+1;} //re-arrange digit positions
+  if (dig<16) {
+    if (dig<=7) {dig = dig*2;} else {dig = ((dig-8)*2)+1;} //re-arrange digit positions
     displayRam[dig] = val;
     return 0;
   } else {
@@ -318,7 +318,7 @@ uint8_t HT16K33::set7SegRaw(uint8_t dig, uint8_t val) {
 // To do it on chip a call to "sendLed" is needed
 //
 uint8_t HT16K33::set16Seg(uint8_t dig, uint8_t cha){ // position 0-15, 0-15 (0-F Hexadecimal)
-  if (cha>=0 && cha<128 && dig>=0 && dig<8){
+  if (cha<128 && dig<8){
     dig = dig*2;
     // reverse the bits using a lookup table
     //    displayRam[dig+1] = BitReverseTable256[lowByte(seg16Chartable[cha])];
@@ -500,5 +500,3 @@ void HT16K33::displayOn(){
 void HT16K33::displayOff(){
   i2c_write(HT16K33_DSP |HT16K33_DSP_OFF);
 } // displayOff
-
-
