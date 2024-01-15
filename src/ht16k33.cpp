@@ -342,7 +342,7 @@ uint8_t HT16K33::set16Seg(uint8_t dig, uint8_t cha){ // position 0-15, 0-15 (0-F
 // level 0-15, 0 means display off
 //
 uint8_t HT16K33::setBrightness(uint8_t level){
-  if (level<HT16K33_DIM_16){
+  if (level<=HT16K33_DIM_16){
     return i2c_write(HT16K33_DIM|level);
   } else {
     return 1;
