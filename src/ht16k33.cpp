@@ -19,14 +19,14 @@
  * 2015-10-04  Peter Sjoberg <peters-alib AT techwiz.ca>
  *             Created using https://www.arduino.cc/en/Hacking/LibraryTutorial and ht16k33 datasheet
  * 2015-11-25  Peter Sjoberg <peters-alib AT techwiz DOT ca>
- *	       first check in to github
+ *             first check in to github
  * 2016-08-09  René Wennekes <rene.wennekes AT gmail.com>
  *             Contribution of 7-segment & 16-segment display support
  *             Added clearAll() function
- *
- *
- *
- *
+ * 2023-09-11  Nomake Wan <nomake_wan AT yahoo.co.jp>
+ *             Fix for compiler warnings in IDE
+ * 2024-01-14  Nomake Wan <nomake wan AT yahoo.co.jp>
+ *             Fix to allow full brightness in setBrightness() function
  *
  */
 
