@@ -27,6 +27,8 @@
  *             Fix for compiler warnings in IDE
  * 2024-01-14  Nomake Wan <nomake_wan AT yahoo.co.jp>
  *             Fix to allow full brightness in setBrightness() function
+ * 2025-03-08  F4AVI Fabrice at https://github.com/F4AVI/F4AVI
+ *             Corrected constants for blinkrate
  *
  */
 
@@ -47,10 +49,10 @@
 #define HT16K33_DSP           0b10000000 // Display setup
 #define HT16K33_DSP_OFF       0b00000000 // Display setup - display off
 #define HT16K33_DSP_ON        0b00000001 // Display setup - display on
-#define HT16K33_DSP_NOBLINK   0b00000000 // Display setup - no blink
-#define HT16K33_DSP_BLINK2HZ  0b00000010 // Display setup - 2hz blink
-#define HT16K33_DSP_BLINK1HZ  0b00000100 // Display setup - 1hz blink
-#define HT16K33_DSP_BLINK05HZ 0b00000110 // Display setup - 0.5hz blink
+#define HT16K33_DSP_NOBLINK   0b10000000 // Display setup - no blink
+#define HT16K33_DSP_BLINK2HZ  0b10000010 // Display setup - 2hz blink
+#define HT16K33_DSP_BLINK1HZ  0b10000100 // Display setup - 1hz blink
+#define HT16K33_DSP_BLINK05HZ 0b10000110 // Display setup - 0.5hz blink
 #define HT16K33_RIS           0b10100000 // ROW/INT Set
 #define HT16K33_RIS_OUT       0b00000000 // Set INT as row driver output
 #define HT16K33_RIS_INTL      0b00000001 // Set INT as int active low
