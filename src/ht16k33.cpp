@@ -341,7 +341,7 @@ uint8_t HT16K33::set16Seg(uint8_t dig, uint8_t cha){ // position 0-15, 0-15 (0-F
 
 /****************************************************************/
 // Change brightness of the whole display
-// level 0-15, 0 means display off
+// dimming level 0-15, 0 is 1/16 and 15 is full brightness
 //
 uint8_t HT16K33::setBrightness(uint8_t level){
   if (level<=HT16K33_DIM_16){

@@ -78,7 +78,7 @@ uint8_t   set7SegRaw(uint8_t dig, uint8_t val);             // load byte "pos" w
 uint8_t   set16SegNow(uint8_t dig, uint8_t cha);            // position 0-17, see asciifont.h and send led in one function
 uint8_t   setLedNow(uint8_t ledno);                         // Set a single led and send led in one function
 uint8_t   clearLedNow(uint8_t ledno);                       // Clear a single led and send led in one function
-uint8_t   setBrightness(uint8_t level);                     // level 0-16, 0 means display off
+uint8_t   setBrightness(uint8_t level);                     // dimming level 0-15, 0 is 1/16 and 15 is full brightness
 uint8_t   keyINTflag();                                     // INTerrupt flag value, set when a key is pressed
 uint8_t   keysPressed();                                    // report how many keys that are pressed, clear means report as if new
 int8_t    readKey(boolean clear=false);                     // read what key was pressed, Fresh=false to go from cache
